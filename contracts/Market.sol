@@ -251,6 +251,7 @@ contract Market is usingOraclize {
     }
 
     function calculateBetResult(uint _value) public {
+    require(msg.sender == pl.owner() || msg.sender == oraclize_cbAddress());
       require(now >= expireTime.add(predictionForDate),"bet not yet expired");
 
       require(betStatus == BetStatus.Closed,"bet not closed");
