@@ -331,7 +331,7 @@ contract Market is usingOraclize {
            send = 0;
        } else{
           send = 0;
-          reward = userPoints.mul(rewardToDistribute).div(optionsAvailable[WinningOption].betPoints);
+          reward = rewardToDistribute.mul(userPoints).div(optionsAvailable[WinningOption].betPoints);
           uint maxReturnCap = maxReturn * ethStaked[msg.sender][WinningOption];
           if(reward > maxReturnCap) {
             _transferEther(address(pl), reward.sub(maxReturnCap));
