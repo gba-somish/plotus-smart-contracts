@@ -83,6 +83,7 @@ contract Market is usingOraclize {
     public
     payable 
     {
+      require(msg.value > 0,"Fee required for oraclize");//0.0040451 required for current oraclize call
       pl = IPlotus(msg.sender);
       startTime = _uintparams[0];
       FeedSource = _feedsource;
