@@ -248,7 +248,7 @@ contract Market is usingOraclize {
       } else {
         predictionForDate.sub(now.sub(expireTime));
       }
-      marketResultId = oraclize_query(predictionForDate, "URL", "json(https://financialmodelingprep.com/api/v3/majors-indexes/.DJI).price");
+      marketResultId = oraclize_query(predictionForDate, "URL", "json(https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT).price");
     }
 
     function calculateBetResult(uint _value) public {
