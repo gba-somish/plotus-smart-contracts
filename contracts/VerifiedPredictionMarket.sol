@@ -4,6 +4,8 @@ import "./external/openzeppelin-solidity/math/SafeMath.sol";
 import "./external/oraclize/ethereum-api/usingOraclize.sol";
 import "./config/MarketConfig.sol";
 import "./interface/IChainLinkOracle.sol";
+import "./BeaconContract.sol";
+
 
 contract IPlotus {
 
@@ -21,6 +23,7 @@ contract IPlotus {
     function callMarketResultEvent(uint _commision, uint _donation, uint _totalReward, uint winningOption) public {
     }
 }
+
 contract Market is usingOraclize {
     using SafeMath for uint;
 
@@ -225,13 +228,22 @@ contract Market is usingOraclize {
       uint totalReward = 0;
       uint distanceFromWinningOption = 0;
       predictionStatus = PredictionStatus.ResultDeclared;
-      if(_value < optionsAvailable[2].minValue) {
+      
+      BeaconContract beacon = BeaconContract(0x79474439753C7c70011C3b00e06e559378bAD040);
+      (, bytes32 random) = beacon.getLatestRandomness();
+       
+      uint ran  = uint(random).mod(subscribers.length.sub(winners.length)); 
+      
+      
+      if(_value < optionsAvailable[2].minValue + ran) {
         WinningOption = 1;
-      } else if(_value > optionsAvailable[2].maxValue) {
+      } else if(_value > optionsAvailable[2].maxValue + ran ) {
         WinningOption = 3;
       } else {
         WinningOption = 2;
       }
+      
+      
       for(uint i=1;i <= totalOptions;i++){
        distanceFromWinningOption = i>WinningOption ? i.sub(WinningOption) : WinningOption.sub(i);    
        totalReward = totalReward.add((distanceFromWinningOption.mul(lossPercentage).mul(optionsAvailable[i].ethLeveraged)).div(100));
