@@ -135,12 +135,11 @@ contract Market is usingOraclize {
       uint maxDistance;
       
       (, bytes32 random) = getLatestRandomness();
-      uint ran  = uint(random).mod(subscribers.length.sub(winners.length));
       
-      if(currentPrice < optionsAvailable[2].minValue + ran ) {
+      if(currentPrice < optionsAvailable[2].minValue + random ) {
         currentPriceOption = 1;
         maxDistance = 2;
-      } else if(currentPrice > optionsAvailable[2].maxValue + ran) {
+      } else if(currentPrice > optionsAvailable[2].maxValue + random) {
         currentPriceOption = 3;
         maxDistance = 2;
       } else {
@@ -257,11 +256,10 @@ contract Market is usingOraclize {
       predictionStatus = PredictionStatus.ResultDeclared;
       
       (, bytes32 random) = getLatestRandomness();
-      uint ran  = uint(random).mod(subscribers.length.sub(winners.length));
       
-      if(_value < optionsAvailable[2].minValue + ran) {
+      if(_value < optionsAvailable[2].minValue + random) {
         WinningOption = 1;
-      } else if(_value > optionsAvailable[2].maxValue + ran ) {
+      } else if(_value > optionsAvailable[2].maxValue + random) {
         WinningOption = 3;
       } else {
         WinningOption = 2;
