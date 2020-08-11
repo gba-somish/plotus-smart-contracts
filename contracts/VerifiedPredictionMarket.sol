@@ -4,7 +4,14 @@ import "./external/openzeppelin-solidity/math/SafeMath.sol";
 import "./external/oraclize/ethereum-api/usingOraclize.sol";
 import "./config/MarketConfig.sol";
 import "./interface/IChainLinkOracle.sol";
-import "./BeaconContract.sol";
+import "https://github.com/starkware-libs/veedo/blob/master/contracts/BeaconContract.sol";
+
+
+contract Beacon{
+    
+    function getLatestRandomness()external view returns(uint256,bytes32){}
+    
+}
 
 
 contract IPlotus {
@@ -32,6 +39,7 @@ contract Market is usingOraclize {
       Closed,
       ResultDeclared
     }
+    
   
     uint internal startTime;
     uint internal expireTime;
@@ -69,6 +77,21 @@ contract Market is usingOraclize {
     modifier OnlyOwner() {
       require(msg.sender == pl.owner() || msg.sender == address(pl));
       _;
+    }
+    
+    function setBeaconContractAddress(address _address) public  {
+        BeaconContractAddress=_address;
+    }
+    
+     address public BeaconContractAddress=0x79474439753C7c70011C3b00e06e559378bAD040;
+    
+    function generateRandomNumber() public view returns(bytes32){
+        uint blockNumber;
+        bytes32 randomNumber;
+        Beacon beacon=Beacon(BeaconContractAddress);
+        (blockNumber,randomNumber)=beacon.getLatestRandomness();
+        return randomNumber;
+       
     }
 
     function initiate(uint[] memory _uintparams,string memory _feedsource,address marketConfigs) public {
@@ -110,10 +133,14 @@ contract Market is usingOraclize {
       }
       uint currentPrice = uint(chainLinkOracle.latestAnswer()).div(10**8);
       uint maxDistance;
-      if(currentPrice < optionsAvailable[2].minValue) {
+      
+      (, bytes32 random) = getLatestRandomness();
+      uint ran  = uint(random).mod(subscribers.length.sub(winners.length));
+      
+      if(currentPrice < optionsAvailable[2].minValue + ran ) {
         currentPriceOption = 1;
         maxDistance = 2;
-      } else if(currentPrice > optionsAvailable[2].maxValue) {
+      } else if(currentPrice > optionsAvailable[2].maxValue + ran) {
         currentPriceOption = 3;
         maxDistance = 2;
       } else {
@@ -229,11 +256,8 @@ contract Market is usingOraclize {
       uint distanceFromWinningOption = 0;
       predictionStatus = PredictionStatus.ResultDeclared;
       
-      BeaconContract beacon = BeaconContract(0x79474439753C7c70011C3b00e06e559378bAD040);
-      (, bytes32 random) = beacon.getLatestRandomness();
-       
-      uint ran  = uint(random).mod(subscribers.length.sub(winners.length)); 
-      
+      (, bytes32 random) = getLatestRandomness();
+      uint ran  = uint(random).mod(subscribers.length.sub(winners.length));
       
       if(_value < optionsAvailable[2].minValue + ran) {
         WinningOption = 1;
